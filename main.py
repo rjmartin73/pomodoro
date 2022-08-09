@@ -1,5 +1,6 @@
 from tkinter import (Tk, Canvas, Label, Button, PhotoImage)
 from playsound import playsound
+from pathlib import Path
 
 # ----------------------------- CONSTANTS ----------------------------- #
 PINK = "#e2979c"
@@ -7,13 +8,18 @@ RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 25
+WORK_MIN = .1
 SHORT_BREAK = 7
 LONG_BREAK = 20
 CHECK = "✓"
-SOUNDFILE = "Computer_Magic.mp3"
 cycles = 0
 timer = None
+file_path = Path("./files/")
+bg_img = str(file_path / "tomato.png")
+sound_file = str(file_path / "Computer_Magic.mp3")
+
+print(bg_img)
+print(sound_file)
 
 
 # ----------------------------- TIMER RESET ----------------------------- #
@@ -61,7 +67,7 @@ def countown_mechanism(secs: int):
         window.update()
         window.attributes('-topmost', False)
         window.update()
-        playsound(SOUNDFILE)
+        playsound(sound_file)
         cycle_label.config(text=f"{CHECK * (cycles // 2)}")
         timer_mechanism()
 
@@ -73,8 +79,7 @@ window.title("Pomodoro")
 window.config(padx=75, pady=50, background=YELLOW)
 
 # background image
-bg_img = PhotoImage(file="tomato.png")
-
+bg_img = PhotoImage(file=bg_img)
 work_break_label = Label(text="Timer", font=(FONT_NAME, 50, "normal"),
                          background=YELLOW, foreground=GREEN)
 work_break_label.grid(row=0, column=1)
@@ -88,11 +93,10 @@ bg = canvas.create_image(100, 112, image=bg_img,)
 timer_text = canvas.create_text(100, 130, text="00:00", fill="white",
                                 font=(FONT_NAME, 25, "bold"))
 
-
 # Buttons
 start_stop = "Start"
-start_button = Button(window, text=start_stop, highlightthickness=0, borderwidth=0,
-                      command=lambda: timer_mechanism())
+start_button = Button(window, text=start_stop, highlightthickness=0,
+                      borderwidth=0, command=lambda: timer_mechanism())
 reset_button = Button(window, text="Reset", highlightthickness=0,
                       borderwidth=0, command=timer_reset)
 
@@ -106,10 +110,6 @@ window.lift()
 window.attributes('-topmost', True)
 window.update()
 window.attributes('-topmost', False)
-
-
-# playsound(SOUNDFILE)
-
 
 if __name__ == '__main__':
     window.mainloop()

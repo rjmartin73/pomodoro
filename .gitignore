@@ -1,3 +1,5 @@
 Lib/
 Scripts/
+build/
+dist/
 old.py
