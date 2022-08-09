@@ -1,8 +1,5 @@
-from glob import glob
 from tkinter import (Tk, Canvas, Label, Button, PhotoImage)
-from turtle import color
 from playsound import playsound
-import time
 
 # ----------------------------- CONSTANTS ----------------------------- #
 PINK = "#e2979c"
