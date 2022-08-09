@@ -1,4 +1,7 @@
-from tkinter import *
+from glob import glob
+from tkinter import (Tk, Canvas, Label, Button, PhotoImage)
+from turtle import color
+from playsound import playsound
 import time
 
 # ----------------------------- CONSTANTS ----------------------------- #
@@ -8,47 +11,62 @@ GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
 WORK_MIN = 25
-SHORT_BREAK = 5
+SHORT_BREAK = 7
 LONG_BREAK = 20
 CHECK = "✓"
+SOUNDFILE = "Computer_Magic.mp3"
+cycles = 0
+timer = None
+
 
 # ----------------------------- TIMER RESET ----------------------------- #
-
-
 def timer_reset():
-    canvas.delete(2)
+    global cycles
+    window.after_cancel(timer)
+    work_break_label.config(text="Timer", fg=GREEN)
     canvas.itemconfig(timer_text, text="00:00")
-    canvas.update()
-
-    pass
+    cycles = 0
+    window.update()
 
 
 # ----------------------------- TIMER MECHANISM ----------------------------- #
 def timer_mechanism():
-    cycles = 0
-    while cycles <= 4:
-        countown_mechanism(1)
-        countown_mechanism(1)
-        cycle_label.config(text=CHECK * cycles)
-        canvas.update()
-        cycles += 1
+    global cycles
+    cycles += 1
+    work_secs = WORK_MIN * 60
+    short_break_secs = SHORT_BREAK * 60
+    long_break_secs = LONG_BREAK * 60
+
+    if cycles % 8 > 0:
+        if cycles % 2 > 0:
+            work_break_label.config(text="Work", fg=GREEN)
+            countown_mechanism(int(work_secs))
+        else:
+            work_break_label.config(text="Break", fg=PINK)
+            countown_mechanism(int(short_break_secs))
+    else:
+        work_break_label.config(text="Break", fg=RED)
+        countown_mechanism(int(long_break_secs))
 
 
-# ----------------------------- COUNTDOWN MECHANISM ----------------------------- #
-def countown_mechanism(minutes: int):
-    minutes = minutes
-    seconds = -1
-
-    while minutes >= 0:
-        while seconds > 0:
-            time.sleep(1)
-            seconds -= 1
-            canvas.itemconfig(timer_text, text=f"{minutes:02d}:{seconds:02d}")
-            canvas.itemconfig(bg)
-            canvas.update()
-        minutes -= 1
-        seconds = 59
-        canvas.itemconfig(timer_text, text=f"{minutes}:{seconds}")
+# --------------------------- COUNTDOWN MECHANISM --------------------------- #
+def countown_mechanism(secs: int):
+    minutes = secs // 60
+    seconds = secs % 60
+    canvas.itemconfig(timer_text, text=f"{minutes :02d}:{seconds :02d}")
+    if secs > 0:
+        global timer
+        timer = window.after(1000, countown_mechanism, secs - 1)
+    else:
+        window.lift()
+        window.update()
+        window.attributes('-topmost', True)
+        window.update()
+        window.attributes('-topmost', False)
+        window.update()
+        playsound(SOUNDFILE)
+        cycle_label.config(text=f"{CHECK * (cycles // 2)}")
+        timer_mechanism()
 
 
 # ----------------------------- UI SETUP ----------------------------- #
@@ -60,32 +78,40 @@ window.config(padx=75, pady=50, background=YELLOW)
 # background image
 bg_img = PhotoImage(file="tomato.png")
 
-work_break_label = Label(text="Timer", font=(FONT_NAME, 35, "normal"), background=YELLOW,
-                         foreground=GREEN)
+work_break_label = Label(text="Timer", font=(FONT_NAME, 50, "normal"),
+                         background=YELLOW, foreground=GREEN)
 work_break_label.grid(row=0, column=1)
 
 # canvas
 canvas = Canvas(window, width=200, height=224, highlightthickness=0,)
 canvas.config(background=YELLOW,)
 canvas.grid(row=1, column=1, )
-bg = canvas.create_image(100, 112, image=bg_img,)
-timer_text = canvas.create_text(100, 130, text="00:05", fill="white", font=(FONT_NAME, 35, "bold"))
 
+bg = canvas.create_image(100, 112, image=bg_img,)
+timer_text = canvas.create_text(100, 130, text="00:00", fill="white",
+                                font=(FONT_NAME, 25, "bold"))
 
 
 # Buttons
+start_stop = "Start"
+start_button = Button(window, text=start_stop, highlightthickness=0, borderwidth=0,
+                      command=lambda: timer_mechanism())
+reset_button = Button(window, text="Reset", highlightthickness=0,
+                      borderwidth=0, command=timer_reset)
 
-start_button = Button(window, text="Start", bg=YELLOW, highlightthickness=0, borderwidth=0,
-                      command=timer_mechanism)
-reset_button = Button(window, text="Reset", bg=YELLOW, highlightthickness=0, borderwidth=0,
-                      command=timer_reset)
-
-cycle_label = Label(anchor="center", text=f"{CHECK}", font=(FONT_NAME, 30, "bold"),
+cycle_label = Label(anchor="center", text="", font=(FONT_NAME, 30, "bold"),
                     background=YELLOW, foreground="green", padx=5, pady=4)
+
 start_button.grid(row=2, column=0)
 cycle_label.grid(row=2, column=1, )
 reset_button.grid(row=2, column=2, )
+window.lift()
+window.attributes('-topmost', True)
+window.update()
+window.attributes('-topmost', False)
 
+
+# playsound(SOUNDFILE)
 
 
 if __name__ == '__main__':
